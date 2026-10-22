@@ -20,18 +20,20 @@ Ein sicherer, moderner Desktop-Passwortmanager auf Basis von **Java 17 LTS**, **
 
 ### 🎯 Sicherheits-Highlights & Architektur
 
-- **Authentifizierte Verschlüsselung (AES-256-GCM):**
-  Nutzt Galois/Counter Mode mit zufälligem 96-Bit (12-Byte) Initialisierungsvektor (IV) pro Eintrag und einem 128-Bit Authentifizierungstag zum Schutz vor Bit-Flipping und Manipulationen. Abwärtskompatibel zu älteren AES-Formaten.
-- **NIST/BSI-konforme Schlüsselableitung (KDF):**
+- **Authentifizierte Verschlüsselung (AES-256-GCM):**  
+  Nutzt Galois/Counter Mode mit zufälligem 96-Bit (12-Byte) Initialisierungsvektor (IV) pro Eintrag und einem 128-Bit Authentifizierungstag zum Schutz vor Bit-Flipping und Manipulationen. Vollständig abwärtskompatibel zu älteren AES-Formaten.
+- **NIST/BSI-konforme Schlüsselableitung (KDF):**  
   Master-Keys werden über `PBKDF2WithHmacSHA256` mit 600.000 Iterationen und kryptografisch sicherem 16-Byte-Salt abgeleitet.
-- **In-Memory Zeroization (Schutz vor RAM-Dumps):**
+- **In-Memory Zeroization (Schutz vor RAM-Dumps):**  
   Sensible Passwörter und Schlüssel-Arrays werden nach Benutzung direkt im Speicher genullt (`Arrays.fill(chars, '\0')`), um ein Auslesen aus dem Java-Heap zu verhindern.
-- **Automatisches Leeren der Zwischenablage:**
+- **Automatisches Leeren der Zwischenablage:**  
   In die Zwischenablage kopierte Zugangsdaten werden nach 30 Sekunden durch einen Daemon-Thread automatisch gelöscht (Schutz vor Clipboard-Hijacking).
-- **Kryptografischer Passwort-Generator:**
-  Erzeugt sichere Kennwörter via `SecureRandom` mit garantierter Einbindung geforderter Zeichensätze und Entropie-Berechnung.
-- **Moderne FlatLaf-Oberfläche:**
-  High-DPI-fähige Desktop-GUI mit Dark/Light-Theme, Kategorien-Baumansicht und interaktiver Passwort-Stärke-Anzeige.
+- **Kryptografischer Passwort-Generator:**  
+  Erzeugt sichere Kennwörter via `SecureRandom` mit garantierter Einbindung geforderter Zeichensätze (Groß-, Kleinbuchstaben, Ziffern, Sonderzeichen) und Entropie-Berechnung.
+- **Moderne FlatLaf-Oberfläche:**  
+  High-DPI-fähige Desktop-GUI mit Dark/Light-Theme, hierarchischer Kategorien-Baumansicht und interaktiver Passwort-Stärke-Anzeige.
+- **Standalone Executable Fat JAR:**  
+  Bündelt alle Bibliotheken in eine einzige lauffähige JAR-Datei via `maven-shade-plugin`.
 
 ---
 
@@ -107,6 +109,9 @@ java -jar target/PasswordManager-1.0.0.jar
 
 ---
 
+### 📄 Lizenz
+MIT-Lizenz. Erstellt von [Tom7668h](https://github.com/Tom7668h).
+
 <br><br>
 
 ---
@@ -117,22 +122,54 @@ An enterprise-grade, privacy-first desktop password manager built with **Java 17
 
 ---
 
-### 🎯 Key Highlights & Security Architecture
+### 🎯 Security Highlights & Architecture
 
-- **Authenticated Encryption (AES-256-GCM):**
-  Uses Galois/Counter Mode with a random 96-bit (12-byte) IV per entry and a 128-bit authentication tag. Protects against bit-flipping attacks and ciphertext tampering. Automatically backwards compatible with legacy AES formats.
-- **NIST/BSI-Compliant Key Derivation:**
+- **Authenticated Encryption (AES-256-GCM):**  
+  Uses Galois/Counter Mode with a random 96-bit (12-byte) IV per entry and a 128-bit authentication tag to protect against bit-flipping attacks and ciphertext tampering. Fully backwards compatible with legacy AES formats.
+- **NIST/BSI-Compliant Key Derivation (KDF):**  
   Master keys are derived using `PBKDF2WithHmacSHA256` with 600,000 iterations and cryptographically secure 16-byte random salts.
-- **In-Memory Zeroization (RAM Dump Protection):**
+- **In-Memory Zeroization (RAM Dump Protection):**  
   Sensitive credentials and master keys are cleared in memory (`Arrays.fill(chars, '\0')`) to prevent sensitive data from lingering in Java heap memory.
-- **Auto-Clearing System Clipboard:**
-  Passwords copied to the operating system clipboard are automatically cleared after 30 seconds via scheduled daemon threads, preventing clipboard-snooping malware from harvesting credentials.
-- **Cryptographic Password Generator:**
+- **Auto-Clearing System Clipboard:**  
+  Credentials copied to the operating system clipboard are automatically cleared after 30 seconds via scheduled daemon threads, preventing clipboard-snooping malware from harvesting credentials.
+- **Cryptographic Password Generator:**  
   Generates passphrases using `SecureRandom` with guaranteed presence of requested character sets (uppercase, lowercase, numbers, symbols) and entropy calculation.
-- **Modern FlatLaf Dark UI:**
-  Clean, high-DPI desktop experience with Dark/Light theme switching, categorized tree structure, and responsive tables.
-- **Standalone Executable Fat JAR:**
+- **Modern FlatLaf Dark UI:**  
+  Clean, high-DPI desktop experience with Dark/Light theme switching, categorized tree structure, and responsive password strength metering.
+- **Standalone Executable Fat JAR:**  
   Packages all dependencies into a single runnable JAR via `maven-shade-plugin`.
+
+---
+
+### 🏗️ Architecture & Component Flow
+
+```mermaid
+flowchart TD
+    subgraph UI ["Desktop User Interface (FlatLaf Swing)"]
+        Frame["PasswordManagerFrame (Category Tree & Entries Table)"]
+        Dialogs["LoginDialog | RegisterDialog | OptionsDialog | GeneratorDialog"]
+        Meter["PasswordStrength Meter (Entropy & Recommendations)"]
+    end
+
+    subgraph SecurityCore ["Security & Cryptographic Engine"]
+        AES["TextEncrypterAES (AES-256-GCM + Random IV)"]
+        KDF["PasswordHasher (PBKDF2-HMAC-SHA256 + 16-byte Salt)"]
+        Gen["PasswordGenerator (SecureRandom + Character Shuffling)"]
+        Zero["SecurityUtil (Memory Zeroization & Clipboard Wipe)"]
+    end
+
+    subgraph Storage ["Encrypted Vault Persistence"]
+        JSON["Encrypted Master Vault (.pmvault / JSON)"]
+        Backups["Options & Category Configurations"]
+    end
+
+    Dialogs --> KDF
+    Frame --> AES
+    Frame --> Gen
+    Frame --> Zero
+    AES --> JSON
+    KDF --> JSON
+```
 
 ---
 
@@ -148,12 +185,31 @@ git clone https://github.com/Tom7668h/PasswordManager.git
 cd PasswordManager
 mvn clean test
 ```
+*Result: 26 out of 26 Unit Tests passed (100% green).*
 
 #### 2. Package Executable JAR
 ```bash
 mvn package -DskipTests
+```
+This produces `target/PasswordManager-1.0.0.jar` with all dependencies bundled inside.
+
+#### 3. Launch Application
+Double-click `target/PasswordManager-1.0.0.jar` or execute from terminal:
+```bash
 java -jar target/PasswordManager-1.0.0.jar
 ```
+
+---
+
+### 🧪 Automated Test Suite (JUnit 5)
+
+| Test Suite | Coverage & Validation |
+| :--- | :--- |
+| **`TextEncrypterAESTest`** | AES-256-GCM roundtrip, random IV indistinguishability, wrong key rejection, ciphertext tamper detection |
+| **`PasswordHasherTest`** | SHA-256, SHA-512, MD5, PBKDF2 salt generation, constant-time hash verification |
+| **`PasswordGeneratorTest`** | Length guarantees, character set inclusion, shuffle randomness, digits-only mode |
+| **`SecurityUtilTest`** | Shannon entropy calculations, weak/strong rating, char/byte array zeroization, token generation |
+| **`PasswordEntryTest`** | Value object integrity, copy constructor, equals & hashCode contracts |
 
 ---
 
