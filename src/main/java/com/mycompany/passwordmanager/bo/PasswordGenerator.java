@@ -1,51 +1,65 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.passwordmanager.bo;
 
 import java.security.SecureRandom;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- *
- * @author Tom7668h
+ * Cryptographically Secure Password Generator
  */
 public class PasswordGenerator {
 
-    private static final String LOWERCASE_CHARACTERS = "abcdefghijklmnopqrstuvwxyz";
-    private static final String UPPERCASE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static final String DIGITS = "0123456789";
-    private static final String SPECIAL_CHARACTERS = "!@#$%^&*()-_=+[]{}|;:'\\\",.<>?/";
+    public static final String LOWERCASE_CHARACTERS = "abcdefghijklmnopqrstuvwxyz";
+    public static final String UPPERCASE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public static final String DIGITS = "0123456789";
+    public static final String SPECIAL_CHARACTERS = "!@#$%^&*()-_=+[]{}|;:,.<>?";
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     public static String generatePassword(int length, boolean useLowercase, boolean useUppercase, boolean useDigits, boolean useSpecialCharacters) {
-        final String characterPattern = buildCharacterPattern(useLowercase, useUppercase, useDigits, useSpecialCharacters);
-        if(characterPattern.length() <= 0) {
-            return null;
+        if (length <= 0) {
+            return "";
         }
-        final Random random = new SecureRandom();
-        String password = "";
-        for (int character = 0; character < length; character++) {
-            final int randomIndex = random.nextInt(characterPattern.length());
-            password += (characterPattern.charAt(randomIndex));
-        }
-        return password;
-    }
 
-    private static String buildCharacterPattern(boolean useLowercase, boolean useUppercase, boolean useDigits, boolean useSpecialCharacters) {
-        final StringBuilder characters = new StringBuilder();
+        final List<Character> passwordChars = new ArrayList<>(length);
+        final StringBuilder pool = new StringBuilder();
+
+        // Ensure at least one character from each selected category
         if (useLowercase) {
-            characters.append(LOWERCASE_CHARACTERS);
+            pool.append(LOWERCASE_CHARACTERS);
+            passwordChars.add(LOWERCASE_CHARACTERS.charAt(SECURE_RANDOM.nextInt(LOWERCASE_CHARACTERS.length())));
         }
         if (useUppercase) {
-            characters.append(UPPERCASE_CHARACTERS);
+            pool.append(UPPERCASE_CHARACTERS);
+            passwordChars.add(UPPERCASE_CHARACTERS.charAt(SECURE_RANDOM.nextInt(UPPERCASE_CHARACTERS.length())));
         }
         if (useDigits) {
-            characters.append(DIGITS);
+            pool.append(DIGITS);
+            passwordChars.add(DIGITS.charAt(SECURE_RANDOM.nextInt(DIGITS.length())));
         }
         if (useSpecialCharacters) {
-            characters.append(SPECIAL_CHARACTERS);
+            pool.append(SPECIAL_CHARACTERS);
+            passwordChars.add(SPECIAL_CHARACTERS.charAt(SECURE_RANDOM.nextInt(SPECIAL_CHARACTERS.length())));
         }
-        return characters.toString();
+
+        if (pool.length() == 0) {
+            return "";
+        }
+
+        // Fill remaining length
+        while (passwordChars.size() < length) {
+            passwordChars.add(pool.charAt(SECURE_RANDOM.nextInt(pool.length())));
+        }
+
+        // Shuffle so required characters aren't in predictable positions
+        Collections.shuffle(passwordChars, SECURE_RANDOM);
+
+        final StringBuilder result = new StringBuilder(length);
+        for (char c : passwordChars) {
+            result.append(c);
+        }
+
+        return result.toString();
     }
 }

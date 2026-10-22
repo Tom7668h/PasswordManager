@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.passwordmanager.vo.holder;
 
 import java.util.Objects;
@@ -123,4 +119,8 @@ public class PasswordEntry {
         return Objects.equals(this.details, other.details);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(group, title, userName, password, eMail, url, details);
+    }
 }

@@ -3,70 +3,127 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mycompany.mypasswordmanager</groupId>
     <artifactId>PasswordManager</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>PasswordManager</name>
+    <description>Enterprise-Grade Desktop Password Vault with FlatLaf Dark UI, AES-256-GCM Authenticated Encryption, and PBKDF2</description>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <exec.mainClass>com.mycompany.mypasswordmanager.MyPasswordManager</exec.mainClass>
+        <exec.mainClass>com.mycompany.passwordmanager.run.RunPasswordManager</exec.mainClass>
+        <flatlaf.version>3.5.4</flatlaf.version>
+        <gson.version>2.10.1</gson.version>
+        <log4j.version>2.23.1</log4j.version>
+        <junit.version>5.10.2</junit.version>
     </properties>
+
     <dependencies>
-        
-        <!--- Look and Feel -->
-        <!-- https://mvnrepository.com/artifact/com.formdev/flatlaf -->
+        <!-- Modern Look and Feel (FlatLaf) -->
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
-            <version>2.4</version>
-            <type>jar</type>
+            <version>${flatlaf.version}</version>
         </dependency>
-        
-        <!--- JSON -->
-        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+
+        <!-- JSON Serialization -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.9.1</version>
+            <version>${gson.version}</version>
         </dependency>
-        
-        <!--- Logging -->
-        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+
+        <!-- Logging -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.23.1</version>
+            <version>${log4j.version}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.23.1</version>
+            <version>${log4j.version}</version>
         </dependency>
-        
-        <!-- JUnit Tests -->
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+
+        <!-- JUnit 5 Testing Suite -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.0</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        
-        <!-- https://mvnrepository.com/artifact/batik/batik-util -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- SVG / Graphics utilities -->
         <dependency>
             <groupId>batik</groupId>
             <artifactId>batik-util</artifactId>
             <version>1.6-1</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/batik/batik-transcoder -->
         <dependency>
             <groupId>batik</groupId>
             <artifactId>batik-transcoder</artifactId>
             <version>1.6-1</version>
             <type>jar</type>
         </dependency>
-
     </dependencies>
-    <name>PasswordManager</name>
+
+    <build>
+        <plugins>
+            <!-- Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire Test Runner -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+
+            <!-- Executable Fat JAR Builder -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.mycompany.passwordmanager.run.RunPasswordManager</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
